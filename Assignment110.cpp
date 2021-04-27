@@ -2297,6 +2297,7 @@ int getkey(int prevx,int prevy, int *x,int *y, int *endif, player_node_heap* h)
 				goto start;
 			}
 		}
+		else goto start;
 	}
 	else if (ch=='>')
 	{
@@ -2311,6 +2312,7 @@ int getkey(int prevx,int prevy, int *x,int *y, int *endif, player_node_heap* h)
 				goto start;
 			}
 		}
+		else goto start;
 	}
 	else if (ch=='w'||ch=='t'||ch=='d'||ch=='x'||ch=='i'||ch=='e'||ch=='I')
 	{
@@ -2533,7 +2535,7 @@ int getmonsterlist(player_node_heap* h)
 
 		refresh();
 		int key = getch();
-		if (key==27) {print_dungeon_limited(pc); break;}//if ESC pressed
+		if (key==27||key=='b') {print_dungeon_limited(pc); break;}//if ESC pressed
 		else if (key == 259) //if UP key is pressed
 		{
 			if (current != NULL && current->prev) current = current->prev;
