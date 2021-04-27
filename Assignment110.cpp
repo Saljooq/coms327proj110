@@ -176,6 +176,7 @@ public:
 	int index;
 };
 
+int bossFound = 0;
 int attackLine = ylenMax;
 int radius = 2;
 int untangle();
@@ -638,7 +639,7 @@ int main(int argc, char* argv[])
 	}
 
 	if (j) j = atoi(argv[i+1]);
-	else j = 20;
+	else j = 10;
 	//processing for nummon tags beings here
 	//cout<<"getting num of mons "<<j<<endl;
 	//cout<<"total desc "<<monsters.size()<<endl;
@@ -1623,6 +1624,7 @@ int initialize_players(int n, PC* p)
 		npc->desc = desc;
 
 		npc->character = desc->abil;//rand()&0xf;//any character netween 0-15
+		if (npc->character & BOSS) bossFound = 1;
 		//cout<<"variables found"<<endl;
 		npc->speed = roll_dice(desc->speed);//5+ (rand()&0xf);//speed randomly gets selected from 5-20
 		//cout<<"variables found"<<endl;
@@ -1846,7 +1848,7 @@ int next_move(player_node *pn, PC* pc, int* ifend, player_node_heap* h)
 				n->hp -= p->totDam;
 				if (n->hp < 0) temp += "zero";
 				else temp +=  to_string (n->hp);
-
+				attron(COLOR_PAIR(COLOR_WHITE));
 				for (int i = 0; i<temp.size(); i++) mvaddch(0,i,temp[i]);
 
 				if (n->hp < 0)
@@ -2100,7 +2102,9 @@ int next_move(player_node *pn, PC* pc, int* ifend, player_node_heap* h)
 			msg += to_string(p->hp) + " hp left.";
 			else
 			msg += " zero hp left.";
+			attron(COLOR_PAIR(COLOR_RED));
 			for (int i = 0; msg[i]!='.'; i++) mvaddch(attackLine, i, msg[i]);
+			attron(COLOR_PAIR(COLOR_WHITE));
 			attackLine++;
 			if (p->hp < 0){
 				*ifend = 2;
@@ -2281,16 +2285,31 @@ int getkey(int prevx,int prevy, int *x,int *y, int *endif, player_node_heap* h)
 	}
 	else if (ch=='<')
 	{
+
 		if (grid[prevx][prevy]=='<')
 		{
-			*endif=15;
+			if (!(bossFound)) *endif=15;
+			else
+			{
+				string lose = "BOSS FOUND IN THIS LEVEL, CANNOT LEAVE TILL BOSS DEFEATED.";
+				for (i = 0; lose[i]!='.'; i++) mvaddch(0, i, lose[i]);
+				refresh();
+				goto start;
+			}
 		}
 	}
 	else if (ch=='>')
 	{
 		if (grid[prevx][prevy]=='>')
 		{
-			*endif=15;
+			if (!(bossFound)) *endif=15;
+			else
+			{
+				string lose = "BOSS FOUND IN THIS LEVEL, CANNOT LEAVE TILL BOSS DEFEATED.";
+				for (i = 0; lose[i]!='.'; i++) mvaddch(0, i, lose[i]);
+				refresh();
+				goto start;
+			}
 		}
 	}
 	else if (ch=='w'||ch=='t'||ch=='d'||ch=='x'||ch=='i'||ch=='e'||ch=='I')
@@ -2486,6 +2505,18 @@ int getmonsterlist(player_node_heap* h)
 					}
 					mvaddch(left_offset+count, 17+cursor, 'E');
 					cursor++;
+				}
+				else cursor+=3;
+
+				cursor++;
+				if (print_node->npc->character & BOSS)
+				{
+					string boss = "--> BOSS.";
+					for (int i = 0; boss[i]!='.'; i++)
+					{
+						mvaddch(left_offset+count, 17+cursor, boss[i]);
+						cursor++;
+					}
 				}
 
 
